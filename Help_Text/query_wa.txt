@@ -1,0 +1,5 @@
+Worker aliens are spawned asexually from the queen, remember, she is the source. They gather bacteria for the queen to feed from the sides of random modules.
+
+If you enter their module, they will attack or run away if scared. They can be killed or frightened by using your flamethrower, but this will loose you fuel levels. The amount of fuel is unknown to you before you use it, you will only find out how much fuel you lost after killing or frightening the worker.
+
+If you are unable to frighten or kill the worker alien, you will loose heath and may die.

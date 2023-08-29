@@ -1,0 +1,7 @@
+The alien queen, or Telium, is your main target. Find her, and eliminate her, to win the game.
+
+When you enter the same module as her, she will attempt to escape via the random adjacent modules. She can take anywhere between one and three moves. If she arrives in a module with a ventilation shaft, she will travel through it, arriving in a random module.
+
+If Telium is unable to move because the only adjacent module is locked and if you, the player, have sufficient fuel, you win.
+
+However, if Telium is able to escape, you will loose some of your health, if you run out of health, you die.

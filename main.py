@@ -107,7 +107,7 @@ def display_story():
     os.system('clear')
 
 def render_error(custom_code, message, timeout = 5):
-    while timeout != 0:
+    while timeout != -1:
         os.system('clear')
         print("-----------------------------------------------------------------")
         print("Error: {0}".format(custom_code))
@@ -116,19 +116,21 @@ def render_error(custom_code, message, timeout = 5):
         print("Stopping game in {0} seconds".format(timeout))
         timeout -= 1
         sleep(1)
+    os.system('clear')
     sys.exit()
 
-def handle_help_text_file_rendering(type, code):
-    if (type not in ("query")):
-        render_error("TYPENOTFOUND", "Param \"type\" given in help text file rendering does not exist", 5)
+def handle_help_text_file_rendering(type="", code=""):
+    if type != "query":
+        return render_error("TYPENOTFOUND", "Param \"type\" given in help text file rendering does not exist", 5)
     text_file = open("Help_Text/{0}_{1}.txt".format(type, code), 'r')
     os.system('clear')
     print(text_file.read())
+    print("\n\n")
     option = input("(R)eturn to help menu: ")
     if option == "R" or option == "r":
         return display_help()
     else:
-        handle_help_text_file_rendering(type, code)
+        return handle_help_text_file_rendering(type, code)
     
 
 def display_instructions():
@@ -139,16 +141,15 @@ def display_instructions():
     print("4. ")
     option = input("(R)eturn to menu: ")
     if option == "R" or option == "r":
-        show_title_screen()
+        return show_title_screen()
     else:
-        display_instructions()
+        return display_instructions()
 
 def display_help():
     option = 0
-    while option not in ("aq", "wa", "vs", "ip", "lm", "mc", "ss", "ps"):
+    while option not in ("aq", "wa", "vs", "ip", "lm", "mc", "ss", "ps", "r"):
         os.system('clear')
         print("-----------------------------------------------------------------")
-        print("Weclome to the help menu. Please select an option")
         print("Alien Queen - (AQ)")
         print("Worker Aliens - (WA)")
         print("Ventilation Shafts - (VS)")
@@ -157,11 +158,14 @@ def display_help():
         print("Movment Controlls - (MC)")
         print("Station Stats - (SS)")
         print("Player Stats - (PS)")
+        print("Return to menu - (R)")
         print("-----------------------------------------------------------------\n")
-        print("Weclome to the help menu. Please type one of the option codes which can be seen around brackets")
+        print("Welcome to the help menu. Please type one of the option codes which can be seen around brackets")
         option = input("> ")
         option = option.lower()
-    handle_help_text_file_rendering()
+    if option == "r":
+        return show_title_screen()
+    return handle_help_text_file_rendering("query", option)
 
 
 def show_title_screen():
@@ -184,8 +188,10 @@ def show_title_screen():
     elif option == "instructions" or option == "i":
         display_instructions()
     elif option == "quit" or option == "q":
+        os.system("clear")
         sys.exit()
     else:
+        os.system("clear")
         sys.exit()
 
 
