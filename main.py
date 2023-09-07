@@ -139,7 +139,9 @@ def display_instructions():
     print("1. To win you must find and kill the Alien Queen, Telium, by blocking all of it's exits and killing it with your flamethrower")
     print("2. You can use the commands M(2) or MOVE(2) to move to a connecting module next to your current module")
     print("3. Alien workers are placed randomly around the station and can cause you trouble")
-    print("4. ")
+    print("4. Ventilation shafts will randomly move around the station")
+    print("5. You can lock 1 module at a time to block the aliens")
+    print("6. If you run out of health or the staion runs out of power you die")
     option = input("(R)eturn to menu: ")
     if option == "R" or option == "r":
         return show_title_screen()
