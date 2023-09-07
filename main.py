@@ -46,64 +46,78 @@ def display_story():
     for char in paragraph1:
         print(char, end='')
         sys.stdout.flush()
-        sleep(0.1)
-    sleep(5)
+        sleep(0.05)
 
-    print("")
+    print("\n")
     for char in paragraph2:
         print(char, end='')
         sys.stdout.flush()
-        sleep(0.1)
-    sleep(8)
+        sleep(0.05)
 
-    print("")
+    print("\n")
     for char in paragraph3:
         print(char, end='')
         sys.stdout.flush()
-        sleep(0.1)
-    sleep(5)
+        sleep(0.05)
 
-    print("")
+    print("\n")
     for char in paragraph4:
         print(char, end='')
         sys.stdout.flush()
-        sleep(0.1)
-    sleep(10)
+        sleep(0.05)
 
-    print("")
+    print("\n")
     for char in paragraph5:
         print(char, end='')
         sys.stdout.flush()
-        sleep(0.1)
-    sleep(8)
+        sleep(0.05)
 
-    print("")
+    print("\n")
     for char in paragraph6:
         print(char, end='')
         sys.stdout.flush()
-        sleep(0.2)
-    sleep(5)
+        sleep(0.05)
 
-    print("")
+    print("\n")
     for char in paragraph7:
         print(char, end='')
         sys.stdout.flush()
-        sleep(0.1)
-    sleep(5)
+        sleep(0.05)
 
-    print("")
+    print("\n")
     for char in paragraph8:
         print(char, end='')
         sys.stdout.flush()
-        sleep(0.2)
-    sleep(5)
+        sleep(0.05)
 
-    print("")
+    print("\n")
     for char in paragraph9:
         print(char, end='')
         sys.stdout.flush()
-        sleep(0.1)
-    sleep(5)
+        sleep(0.05)
+    option = 0
+    while option not in ("r", "return"):
+        os.system('clear')
+        print(paragraph1)
+        print('\n')
+        print(paragraph2)
+        print('\n')
+        print(paragraph3)
+        print('\n')
+        print(paragraph4)
+        print('\n')
+        print(paragraph5)
+        print('\n')
+        print(paragraph6)
+        print('\n')
+        print(paragraph7)
+        print('\n')
+        print(paragraph8)
+        print('\n')
+        print(paragraph9)
+        print('\n\n')
+        print("-----------------------------------------------------------------")
+        option = input("(R)eturn to help menu: ")
     os.system('clear')
 
 def render_error(custom_code, message, timeout = 5):
@@ -141,7 +155,8 @@ def display_instructions():
     print("3. Alien workers are placed randomly around the station and can cause you trouble")
     print("4. Ventilation shafts will randomly move around the station")
     print("5. You can lock 1 module at a time to block the aliens")
-    print("6. If you run out of health or the staion runs out of power you die")
+    print("6. If you run out of health or the staion runs out of power you die\n")
+    print("-----------------------------------------------------------------")
     option = input("(R)eturn to menu: ")
     if option == "R" or option == "r":
         return show_title_screen()
