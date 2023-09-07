@@ -1,0 +1,16 @@
+When exploring the station, you will always have the ability to move to any adjacent room. Moving between modules cost 1 station power so you must find ways to collect more station power throughout your quest.
+
+Moving between modules can be done by using commands. Here are some examples:
+
+-------------------------
+First Prompt: M or MOVE
+Second Propmt: 2
+-------------------------
+First Prompt: MOVE2
+Second Prompt: Skipped
+-------------------------
+First Prompt: M2
+Second Propmt: Skipped
+-------------------------
+
+Note: Lower case or upper case does not matter

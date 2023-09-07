@@ -1,0 +1,3 @@
+The station has a certain amount of power. Using up off of it will turn off life support and you will die.
+
+Power can be collected by finding the regenerative generators. Flamethrower fuel can be used to give station power in the ratio of 10:1 for each fuel to power.

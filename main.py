@@ -125,7 +125,8 @@ def handle_help_text_file_rendering(type="", code=""):
     text_file = open("Help_Text/{0}_{1}.txt".format(type, code), 'r')
     os.system('clear')
     print(text_file.read())
-    print("\n\n")
+    print("\n")
+    print("-----------------------------------------------------------------")
     option = input("(R)eturn to help menu: ")
     if option == "R" or option == "r":
         return display_help()
@@ -158,6 +159,7 @@ def display_help():
         print("Movment Controlls - (MC)")
         print("Station Stats - (SS)")
         print("Player Stats - (PS)")
+        print("-----------------------------------------------------------------")
         print("Return to menu - (R)")
         print("-----------------------------------------------------------------\n")
         print("Welcome to the help menu. Please type one of the option codes which can be seen around brackets")

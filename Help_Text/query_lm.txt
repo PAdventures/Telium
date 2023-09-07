@@ -1,0 +1,5 @@
+Module locking prevents anything from getting out of it or going in it, execpt for you. If you lock alien workers in a module they pose no threat to you.
+
+However, due to Telium, the alien queen, having immense strength, she can prevent you from locking the module that she is in. Use this to your advantage.
+
+Furthermore, if the alien queen tries to escape through a locked module, she will not be able to open it, and can therefore, not use it as an escape route and must find another means of running away.

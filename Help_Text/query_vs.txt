@@ -1,0 +1,5 @@
+Ventilation shatfs are randomly placed around the space station. They emit cold air into adjacent rooms so detecting them can be easy.
+
+Enter a room with a ventilation shaft will force you to climb into the space station's ventilation system. This will randomly place you in a different module.
+
+Remember that the alien queen too can use this ventilation system.
