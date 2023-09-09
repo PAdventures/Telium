@@ -2,12 +2,16 @@
 
 from time import *  # To use the sleep() procedure to make the program run smoother
 from random import *  # Use for randomising certain things such as chances
+from math import * # Handle damage rounding
 import os  # Useage for using commands in the terminal
 import sys  # Exiting the program
 
+
 # Global Variables
 
-num_modules = 20  # The number of modules in the Charles Darwin
+gamemode = "" # The gamemode the player is in
+num_modules = 0  # The number of modules in the current station
+station = "" # The name of the station that the player is in
 curr_module = 1  # The number of the current module that the player is in
 last_module = 0  # The number of the last module the player was in
 possible_moves = []  # The modules that the player can move to
@@ -17,6 +21,8 @@ alive = True  # Is the player alive
 won = False  # Has the player won
 hp = 100  # Player health
 defence = 10  # Player defence
+damage_reduction = 0 # The damage reduction percentage
+damage_increase = 50 # The damage increase percentage
 power = 100  # The amount of power the space station has
 fuel = 500  # The amount of fuel the player has to use their flamethrower
 locked = 0  # The module that is locked by the player
@@ -147,7 +153,6 @@ def handle_help_text_file_rendering(type="", code=""):
     else:
         return handle_help_text_file_rendering(type, code)
     
-
 def display_instructions():
     os.system('clear')
     print("1. To win you must find and kill the Alien Queen, Telium, by blocking all of it's exits and killing it with your flamethrower")
@@ -186,6 +191,67 @@ def display_help():
         return show_title_screen()
     return handle_help_text_file_rendering("query", option)
 
+def handle_easy_mode():
+    global gamemode, num_modules, station, damage_reduction, hp, defence, fuel, power
+    gamemode = "Easy"
+    num_modules = 17
+    station = "Victoria_Station"
+    damage_reduction = 50
+    hp = 150
+    defence = 20
+    fuel = 750
+    power = 150
+
+def handle_normal_mode():
+    global gamemode, num_modules, station, damage_reduction
+    gamemode = "Normal"
+    num_modules = 20
+    station = "Charles_Darwin"
+    damage_reduction = 0
+
+def handle_hard_mode():
+    global gamemode, num_modules, station, damage_increase, defence
+    gamemode = "Hard"
+    num_modules = 30
+    station = "Iris"
+    damage_increase = 50
+    defence = 5
+
+def handle_impossible_mode():
+    global gamemode, num_modules, station, damage_increase, hp, defence, fuel, power
+    gamemode = "Impossible"
+    num_modules = 50
+    station = "Olympus"
+    damage_increase = 100
+    hp = 50
+    defence = 0
+    fuel = 250
+    power = 50
+
+def show_gamemodes():
+    option = 0
+    while option not in ("easy", "e", "normal", "n", "hard", "h", "impossible", "i"):
+        os.system('clear')
+        print("-----------------------------------------------------------------")
+        print("Easy Mode (E) - Start with 50% more health, less damage taken, more defence, less modules")
+        print("Normal Mode (N) - All settings are default")
+        print("Hard Mode (H) - More damage taken, less defence, more modules")
+        print("Impossible Mode (I) - Start with 50% less health, more damage taken, no defence, more modules")
+        print("-----------------------------------------------------------------\n")
+        print("Type the gamemode you want to play in. If you're new, it is recommened you play normal mode")
+        option = input("> ")
+        option = option.lower()
+    if option == "easy" or option == "e":
+        handle_easy_mode()
+    elif option == "normal" or option == 'n':
+        handle_normal_mode()
+    elif option == "hard" or option == "h":
+        handle_hard_mode()
+    elif option == "impossible" or option == "i":
+        handle_impossible_mode()
+    else:
+        return show_gamemodes()
+    return
 
 def show_title_screen():
     option = 0
@@ -198,7 +264,7 @@ def show_title_screen():
         option = input("> ")
         option = option.lower()
     if option == "play" or option == "p":
-        return
+        return show_gamemodes()
     elif option == "story" or option == "s":
         display_story()
         show_title_screen()
@@ -213,7 +279,6 @@ def show_title_screen():
         os.system("clear")
         sys.exit()
 
-
 def load_module():
     global curr_module, possible_moves, curr_deck, curr_room
     module = get_modules_from(curr_module)
@@ -222,12 +287,11 @@ def load_module():
     curr_room = module[2]
     output_module()
 
-
 def get_modules_from(module):
     moves = []
     deck = ""
     room = ""
-    text_file = open("Charles_Darwin/module" + str(module) + ".txt", "r")
+    text_file = open("Stations/" + station + "/module" + str(module) + ".txt", "r")
     for counter in range(0, 6):
         move_read = text_file.readline()
         if counter == 4:
@@ -241,18 +305,12 @@ def get_modules_from(module):
     text_file.close()
     return moves, deck, room
 
-
-def start_story_line():
-    os.system("clear")
-
-
 def reload_module():
     os.system('clear')
     output_module()
     move_queen()
     output_moves()
     get_action()
-
 
 def output_module():
     os.system('clear')
@@ -263,14 +321,12 @@ def output_module():
     print("You are in module", curr_module)
     print("\n-----------------------------------------------------------------\n")
 
-
 def output_moves():
     global possible_moves
     print("\nFrom here you can move to modules: | ", end=' ')
     for move in possible_moves:
         print(move, ' | ', end=' ')
     print()
-
 
 def get_action():
     global curr_module, last_module, possible_moves, power
@@ -283,6 +339,7 @@ def get_action():
         action = action.upper()
         sleep(1)
         if action.find("M") == 0:
+            move = ""
             if len(action) == 1 or len(action) == 4:
                 print("Enter the module to move to or go back to the actions || Example: 2 or B or BACK")
                 move = input("> ")
@@ -293,11 +350,11 @@ def get_action():
                     move = int(actionArray[1])
             if len(action) == 5:
                 actionArray = list(action)
-                if (actionArray[1].isdigit()):
+                if (actionArray[4].isdigit()):
                     move = int(actionArray[4])
-            if move == "back" or move == "b":
+            if action == "back" or action == "b" or move == "back" or move == "b":
                 return reload_module()
-            elif move.isnumeric() == False:
+            elif str(move).isnumeric() == False:
                 return reload_module()
             elif int(move) in possible_moves:
                 valid_action = True
@@ -329,7 +386,6 @@ def get_action():
             elif command == "back" or command == "b":
                 return reload_module()
 
-
 def spawn_npcs():
     global num_modules, queen, vent_shafts, info_panels, workers
     module_set = []
@@ -349,7 +405,6 @@ def spawn_npcs():
     for counter in range(3):
         i += 1
         workers.append(module_set[i])
-
 
 def check_vent_shafts():
     global num_modules, curr_module, last_module, vent_shafts, fuel
@@ -377,7 +432,6 @@ def check_vent_shafts():
         os.system("clear")
         load_module()
 
-
 def lock():
     global num_modules, power, locked
     new_lock = int(input("Enter module to lock: "))
@@ -393,7 +447,26 @@ def lock():
     if power <= 0:
         alive == False
         return
-
+    
+def calculate_damage(damage):
+    if damage_reduction == 0 and damage_increase == 0:
+        return damage
+    elif damage_reduction > 0:
+        baseDamage = floor((damage / damage_reduction) * 100)
+        totalDamage = baseDamage - defence
+        if totalDamage <= 0:
+            return 0
+        else:
+            return totalDamage
+    elif damage_increase > 0:
+        baseDamage = floor(damage * ((damage_increase / 100) + 1))
+        totalDamage = baseDamage - defence
+        if totalDamage <= 0:
+            return 0
+        else:
+            return totalDamage
+    else:
+        render_error("DMGCAL", 'Calculation error while handling damage taken')
 
 def move_queen():
     global num_modules, curr_module, last_module, locked, queen, won, vent_shafts
@@ -432,7 +505,6 @@ def move_queen():
                             valid_move = False
                     moves_to_make = 0
 
-
 def intuition():
     global possible_moves, workers, vent_shafts
     for connected_module in possible_moves:
@@ -442,7 +514,6 @@ def intuition():
         if connected_module in vent_shafts:
             sleep(1)
             print("I can feel cold air!")
-
 
 def worker_aliens():
     global curr_module, workers, fuel, alive
@@ -460,31 +531,31 @@ def worker_aliens():
             sleep(1)
             print("How will you react? (S, L)")
             action = 0
-            while action not in ("S", "L"):
+            while action not in ("s", "l"):
                 action = input("Press the trigger: ")
+                action = action.lower()
             fuel_used = int(input("How much fuel will you use? ..."))
             fuel -= fuel_used
             if fuel <= 0:
                 alive = False
                 return
-            if action == "S":
+            if action == "s":
                 fuel_needed = 30 + 10 * randint(0, 5)
-            if action == "L":
+            if action == "l":
                 fuel_needed = 90 + 10 * randint(0, 5)
             if fuel_used >= fuel_needed:
                 successful_attack = True
             else:
                 sleep(1)
                 print("The alien squeals but is not dead. It's angry")
-        if action == "S":
+        if action == "s":
             sleep(1)
             print("The alien scuttles away into the corner of the room.")
-        if action == "L":
+        if action == "l":
             sleep(1)
             print("The alien has been destroyed.")
             workers.remove(curr_module)
         print()
-
 
 # Title Screen
 show_title_screen()
@@ -492,12 +563,6 @@ show_title_screen()
 # Main program starts here
 os.system("clear")
 spawn_npcs()
-
-# Developer tool
-print("Queen alien is located in module:", queen)
-print("Ventilation shatfs are located in modules:", vent_shafts)
-print("Information panels are located in modules:", info_panels)
-print("Alien workers are located in modules:", workers)
 
 while alive and not won:
     load_module()
