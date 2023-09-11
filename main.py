@@ -24,7 +24,7 @@ defence = 10  # Player defence
 damage_reduction = 0 # The damage reduction percentage
 damage_increase = 50 # The damage increase percentage
 power = 100  # The amount of power the space station has
-fuel = 500  # The amount of fuel the player has to use their flamethrower
+fuel = 100  # The amount of fuel the player has to use their flamethrower
 locked = 0  # The module that is locked by the player
 queen = 0  # The module that the alien queen is in
 vent_shafts = []  # The modules where vent shafts are located in
@@ -102,7 +102,9 @@ def display_story():
         print(char, end='')
         sys.stdout.flush()
         sleep(0.05)
+    # Force the loop to start
     option = 0
+    # Forces player to type an option below or if they don't writes all paragphs back
     while option not in ("r", "return"):
         os.system('clear')
         print(paragraph1)
@@ -416,6 +418,7 @@ def reload_module():
 
 # Display the current module as a neat output
 def output_module():
+    global fuel
     # Clear the console
     os.system('clear')
     # Show the current module data as a display
@@ -423,7 +426,10 @@ def output_module():
     print(curr_deck + " >>> " + curr_room)
     print()
     print("You are in module", curr_module)
+    print("Queen is in module:", queen)
     print("\n-----------------------------------------------------------------\n")
+    if fuel < 100:
+        print("[WARNING] Low fuel\n")
 
 # Show the modules the player can move to
 def output_moves():
@@ -432,6 +438,53 @@ def output_moves():
     for move in possible_moves:
         print(move, ' | ', end=' ')
     print()
+
+def display_station_power():
+    option = 0
+    while option not in ("return", "r"):
+        os.system("clear")
+        print("-----------------------------------------------------------------")
+        print("Station Power: {0}".format(power))
+        print("-----------------------------------------------------------------\n\n")
+        print("Return to station - (R)")
+        option = input('> ')
+    adjust_station_power("sub", 1)
+    return reload_module()
+
+def display_lifeforms():
+    option = 0
+    lifeforms = len(workers) + 1
+    while option not in ("return", "r"):
+        os.system("clear")
+        print("-----------------------------------------------------------------")
+        print("Lifeforms: {0}".format(lifeforms))
+        print("-----------------------------------------------------------------\n\n")
+        print("Return to station - (R)")
+        option = input('> ')
+    adjust_station_power("sub", 1)
+    return reload_module()
+
+def adjust_station_power(operation, amount):
+    global power
+    if operation == "add":
+        power += amount
+    elif operation == "sub":
+        power -= amount
+    else:
+        return render_error('OPINVALID', 'Operation not valid while adjusting station power')
+    return
+
+def adjust_player_health(operation, amount):
+    global hp, defence
+    if operation == "add":
+        hp += amount
+    elif operation == "sub":
+        hp -= amount
+        if defence > 0:
+            defence -= 1
+    else:
+        return render_error('OPINVALID', 'Operation not valid while adjusting player health')
+    return
 
 # Ask the user to make an action
 def get_action():
@@ -449,6 +502,7 @@ def get_action():
         action = input("> ")
         # Force the input to become upper cased
         action = action.upper()
+        action_copy = action
         # Wait 1 second
         sleep(1)
         # If the input equals an "M" as the first character check for correct inputing format to move the player
@@ -463,21 +517,21 @@ def get_action():
                 # Force the input to become lower cased
                 move = move.lower()
             # If the input length equals 2
-            if len(action) == 2:
+            if len(action) >= 2 and len(action) <= 3:
                 # Turn the input into an array of all characters
                 actionArray = list(action)
-                # Check if the last array item is a number
-                if (actionArray[1].isdigit()):
-                    # If it is, make "move" into this number
+                if len(action) == 2 and action[1].isnumeric():
                     move = int(actionArray[1])
+                elif (actionArray[1] + actionArray[2]).isnumeric():
+                    move = int(actionArray[1] + actionArray[2])
             # If the input length equals 5 and it starts with "MOVE"
-            if len(action) == 5 and action.startswith("MOVE"):
+            if len(action) >= 5 and len(action) <= 6 and action.startswith("MOVE"):
                 # Turn the input into an array of all characters
                 actionArray = list(action)
-                 # Check if the last array item is a number
-                if (actionArray[4].isdigit()):
-                    # If it is, make "move" into this number
+                if len(action) == 5 and actionArray[4].isnumeric():
                     move = int(actionArray[4])
+                elif (actionArray[4] + actionArray[5]).isnumeric():
+                    move = int(actionArray[4] + actionArray[5])
             # If the input or "move" equals "back" or "b"
             if action == "back" or action == "b" or move == "back" or move == "b":
                 # Stop the function and reload the module
@@ -509,12 +563,34 @@ def get_action():
                 sleep(3)
                 # Stop the function and re-load the module
                 return reload_module()
+        # If the input is the lock command
+        if action.find("L") == 0:
+            action_copy = list(action_copy)
+            if len(action_copy) == 1:
+                new_lock = input("Enter module to lock: ")
+                if new_lock.isnumeric():
+                    lock(int(new_lock))
+            elif len(action_copy) >= 2 and len(action_copy) <= 3:
+                if len(action_copy) == 2 and action_copy[1].isnumeric():
+                    lock(int(action_copy[1]))
+                elif (action_copy[1] + action_copy[2]).isnumeric():
+                    lock(int(action_copy[1] + action_copy[2]))
+            elif len(action_copy) == 4:
+                new_lock = input("Enter module to lock: ")
+                if new_lock.isnumeric():
+                    lock(int(new_lock))
+            elif len(action_copy) >= 5 and len(action_copy) <= 6:
+                if len(action_copy) == 2 and action_copy[4].isnumeric():
+                    lock(int(action_copy[4]))
+                elif (action_copy[4] + action_copy[5]).isnumeric():
+                    lock(int(action_copy[4] + action_copy[5]))
+            return reload_module()
         # If the input equals an "S" as the first character check for correct inputing format to open the scanner
         if action.find("S") == 0:
             # Declare a variable to force the while loop to start
             command = 0
             # Continue to loop in the "command" variable is not in the list below
-            while command not in ("lock", "l", "back", "b"):
+            while command not in ("lifeforms", "li", "power", "p", "back", "b") and alive == True:
                 # Clear the console
                 os.system("clear")
                 # Show scanner commands
@@ -522,19 +598,48 @@ def get_action():
                 print("Scanner is ready\n")
                 print("Type the command you would like to use\n")
                 print("- (L)OCK - Use to lock a module to prevent aliens from escaping it")
+                print("- (P)OWER - View how much power the station has")
+                print("- (LI)FEFORMS - Shows all lifeforms on the station except you")
                 print("- (B)ACK - Go back to the action commands")
                 # Ask the user for input
                 command = input("> ")
                 # Force the input to become lower cased
                 command = command.lower()
-            # If the input equals "lock" or "l"
-            if command == "lock" or command == "l":
-                # Stop the function and start the module locking process
-                return lock()
+                # Check if the command is the lifeforms
+                if command == "li" or command == "lifeforms":
+                    break
+                # Check if the command is the lock command
+                if command.startswith('l') or command.startswith('lock'):
+                    command = list(command)
+                    if len(command) == 1:
+                        new_lock = input("Enter module to lock: ")
+                        if new_lock.isnumeric():
+                            lock(int(new_lock))
+                    elif len(command) >= 2 and len(command) <= 3:
+                        if len(command) == 2 and command[1].isnumeric():
+                            lock(int(command[1]))
+                        elif (command[1] + command[2]).isnumeric():
+                            lock(int(command[1] + command[2]))
+                    elif len(command) == 4:
+                        new_lock = input("Enter module to lock: ")
+                        if new_lock.isnumeric():
+                            lock(int(new_lock))
+                    elif len(command) >= 5 and len(command) <= 6:
+                        if len(command) == 2 and command[4].isnumeric():
+                            lock(int(command[4]))
+                        elif (command[4] + command[5]).isnumeric():
+                            lock(int(command[4] + command[5]))
             # If the input equals "back" or "b"
+            if command == "power" or command == "p":
+                # Stop the function and show the station power
+                return display_station_power()
+            elif command == "lifeforms" or command == "li":
+                # Stop the function and show all lifeforms
+                return display_lifeforms()
             elif command == "back" or command == "b":
                 # Stop the function and re-load the module
                 return reload_module()
+                
 
 # Spawn the npcs in random modules
 def spawn_npcs():
@@ -604,25 +709,21 @@ def check_vent_shafts():
         return load_module()
 
 # Ask the player to lock a module
-def lock():
+def lock(new_lock):
     # Allow global variables to be changed
-    global num_modules, power, locked
-    # Ask the user for input
-    new_lock = input("Enter module to lock: ")
-    # If the input is not a number
-    if new_lock.isnumeric == False:
-        # Stop and re-call the function
-        return lock()
-    # Turn the input into a number
-    new_lock = int(new_lock)
+    global num_modules, power, locked, alive
     # If the number is not a module number
     if new_lock < 0 or new_lock > num_modules:
         # Tell the player the operation failed
-        print("Invalid module. Operation failed.")
+        print("Invalid module. Operation failed. Power will still be used")
+    # If the module is the module already locked
+    elif new_lock == locked:
+        # Tell the player the operation failed
+        print("Module already locked. Operation failed. Power will still be used")
     # If the number is the module the queen is in
     elif new_lock == queen:
         # Tell the player the operation failed
-        print("Unable to lock module. Operation failed")
+        print("Unable to lock module. Operation failed. Power will still be used")
     # Or start to lock the module
     else:
         # Set the "locked" global variable to be the module the player inputted
@@ -640,6 +741,7 @@ def lock():
         return
     # Or stop the function
     else:
+        sleep(5)
         return
     
 # Calcuate the total damage applied to a player
@@ -682,7 +784,7 @@ def calculate_damage(damage):
 # Check if the queen is in the same module as the player
 def move_queen():
     # Allow global variables to be changed
-    global num_modules, curr_module, last_module, locked, queen, won, vent_shafts
+    global num_modules, curr_module, last_module, locked, queen, won, vent_shafts, hp, alive
     # If the player is in the queen's module
     if curr_module == queen:
         # Tell the player
@@ -713,10 +815,25 @@ def move_queen():
                 escapes.remove(locked)
             # If the queen has no modules to escape to
             if len(escapes) == 0:
-                # The players wins and is told
-                won = True
-                moves_to_make = 0
+                # Tell the player
                 print("...and the door is locked. It's trapped")
+                sleep(3)
+                print("You get out your flamethrower and prepare to kill the queen...")
+                sleep(5)
+                if fuel < 100:
+                    print('...and you don\'t have enough fuel')
+                    sleep(1)
+                    print("She deals great damage to you")
+                    random_damage = randint(1, 5) * 10
+                    damage_taken = calculate_damage(random_damage)
+                    if damage_taken >= hp:
+                        alive = False
+                    else:
+                        hp -= damage_taken
+                        sleep(1)
+                        print("You survived the attack with only {} hp remaining and retreated to a random adjacted module".format(hp))
+                        escape_modules = get_modules_from(queen)
+                        curr_module = choice(escape_modules[0])
             # Or if it does have an escape route
             else:
                 # If it has 1 move to make
@@ -843,7 +960,7 @@ def worker_aliens():
             sleep(1)
             print("The alien has been destroyed.")
             workers.remove(curr_module)
-        return print()
+        return reload_module()
 
 # Title Screen
 show_title_screen()
