@@ -1,5 +1,5 @@
-As a weak petty human, you only have 100 health. Health can be lost in battles between you and the aliens.
+As a weak petty human, you only have small amount of health which varies depending on which station you enter. Health can be lost in battles between you and the aliens.
 
 As a human, you also have a flamethrower and flamethrower fuel which can be used for battle and power. Use it all and your defenceless. Fuel can be found in ventilation shafts hidden across the station
 
-Even though you only have a small amount of health, you have defence. Defence starts at 10, each defence point you have the less damage you take. However, each battle you do will decrease your defence by one. Make sure you pick your fights stategically.
+Even though you only have a small amount of health, you have defence. Defence can start at 10, but will vary depending on which station you're in, each defence point you have the less damage you take. However, each battle you do will decrease your defence by one. Make sure you pick your fights stategically.

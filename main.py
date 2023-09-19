@@ -427,6 +427,9 @@ def output_module():
     print()
     print("You are in module", curr_module)
     print("Queen is in module:", queen)
+    print("Workers are in modules:", workers)
+    print("Vent Shafts are in modules:", vent_shafts)
+    print("Info Panels are in modules", info_panels)
     print("\n-----------------------------------------------------------------\n")
     if fuel < 100:
         print("[WARNING] Low fuel\n")
@@ -654,17 +657,58 @@ def spawn_npcs():
     # Place the queen in the first module in the array
     i = 0
     queen = module_set[i]
-    # Place the vent shafts in the 2nd, 3rd and 4th modules in the array
-    for counter in range(3):
+    # Default params
+    vent_counter = 3
+    info_counter = 2
+    worker_counter = 3
+    # Check what station the player is in then modify the default params
+    if station == "Charles_Darwin":
+        vent_counter = 4
+        info_counter = 3
+        worker_counter = 4
+    elif station == "Iris":
+        vent_counter = 5
+        info_counter = 4
+        worker_counter = 5
+    elif station == "Olympus":
+        vent_counter = 10
+        info_counter = 5
+        worker_counter = 10
+    # Place the vents in the correct modules without putting it in a medbay room
+    for counter in range(vent_counter):
         i += 1
+        room = get_modules_from(module_set[i])[2]
+        room = room.lower()
+        while room.endswith('medbay'):
+            room = get_modules_from(module_set[i])[2]
+            room = room.lower()
+            i += 1
+        if len(module_set) <= i:
+            continue
         vent_shafts.append(module_set[i])
-    # Place the info panels in the 5th and 6th modules in the array
-    for counter in range(2):
+    # Place the vents in the correct modules without putting it in a medbay room
+    for counter in range(info_counter):
         i += 1
+        room = get_modules_from(module_set[i])[2]
+        room = room.lower()
+        while room.endswith('medbay'):
+            room = get_modules_from(module_set[i])[2]
+            room = room.lower()
+            i += 1
+        if len(module_set) <= i:
+            continue
         info_panels.append(module_set[i])
-    # Place the worker aliens in the 7th, 8th and 9th modules in the array
-    for counter in range(3):
+    # Place the vents in the correct modules without putting it in a medbay room
+    for counter in range(worker_counter):
         i += 1
+        room = get_modules_from(module_set[i])[2]
+        room = room.lower()
+        while room.endswith('medbay'):
+            room = get_modules_from(module_set[i])[2]
+            room = room.lower()
+            i += 1
+        if len(module_set) <= i:
+            continue
         workers.append(module_set[i])
 
 # Check if the player is in a module that contains a vent shaft
@@ -711,7 +755,7 @@ def check_vent_shafts():
 # Ask the player to lock a module
 def lock(new_lock):
     # Allow global variables to be changed
-    global num_modules, power, locked, alive
+    global num_modules, power, locked, alive, curr_module
     # If the number is not a module number
     if new_lock < 0 or new_lock > num_modules:
         # Tell the player the operation failed
@@ -724,6 +768,10 @@ def lock(new_lock):
     elif new_lock == queen:
         # Tell the player the operation failed
         print("Unable to lock module. Operation failed. Power will still be used")
+    # If the number is the module to the player's current module
+    elif new_lock == curr_module:
+        # Tell the player the operation failed
+        print("Unable to lock module you're in. Operation failed. Power will still be used")
     # Or start to lock the module
     else:
         # Set the "locked" global variable to be the module the player inputted
@@ -744,18 +792,38 @@ def lock(new_lock):
         sleep(5)
         return
     
+# Reduce the player's defence
+def reduce_defence():
+    # Allow the global variable to be changed
+    global defence
+    # If defense can be taken
+    if defence > 1:
+        # Reduce defence by 1
+        defence -= 1
+    
 # Calcuate the total damage applied to a player
 def calculate_damage(damage):
     # If both damage reduction and increase are 0
     if damage_reduction == 0 and damage_increase == 0:
-        # Stop the function and return the "damage" variable
-        return damage
+       # Apply the defence if any
+        totalDamage = damage - defence
+        # Reduce the player's defence
+        reduce_defence()
+        # If the "totalDamage" is 0 or less
+        if totalDamage <= 0:
+            # Stop the function and return 0 to say no damage taken
+            return 0
+        # Or stop the function with the "totalDamage"
+        else:
+            return totalDamage
     # If the damage reduction is applied
     elif damage_reduction > 0:
         # Calculate the damage reduction
         baseDamage = floor((damage / damage_reduction) * 100)
         # Apply the defence if any
         totalDamage = baseDamage - defence
+        # Reduce the player's defence
+        reduce_defence()
         # If the "totalDamage" is 0 or less
         if totalDamage <= 0:
             # Stop the function and return 0 to say no damage taken
@@ -769,6 +837,8 @@ def calculate_damage(damage):
         baseDamage = floor(damage * ((damage_increase / 100) + 1))
         # Apply the defence if any
         totalDamage = baseDamage - defence
+        # Reduce the player's defence
+        reduce_defence()
         # On the rare ocation that "totalDamage" is 0 or less
         if totalDamage <= 0:
             # Stop the function and return 0 to say no damage taken
@@ -820,19 +890,30 @@ def move_queen():
                 sleep(3)
                 print("You get out your flamethrower and prepare to kill the queen...")
                 sleep(5)
+                # If the player doesn;t have enough fuel
                 if fuel < 100:
+                    # Tell them
                     print('...and you don\'t have enough fuel')
                     sleep(1)
                     print("She deals great damage to you")
+                    # Randomise damage taken
                     random_damage = randint(1, 5) * 10
+                    # Get a total damage after player stats
                     damage_taken = calculate_damage(random_damage)
+                    # If the player is dead
                     if damage_taken >= hp:
+                        # Set the variable to False
                         alive = False
+                    # If their not
                     else:
+                        # Reduce player health
                         hp -= damage_taken
                         sleep(1)
-                        print("You survived the attack with only {} hp remaining and retreated to a random adjacted module".format(hp))
+                        # Tell the player they survived
+                        print("You survived the attack with only {0} hp remaining and retreated to a random adjacted module".format(hp))
+                        # Move the queen
                         escape_modules = get_modules_from(queen)
+                        # Move the player to a random connecting module
                         curr_module = choice(escape_modules[0])
             # Or if it does have an escape route
             else:
@@ -869,6 +950,73 @@ def move_queen():
                     # Force the queen to have no more moves left
                     moves_to_make = 0
 
+# Check if the player is in an info panel module
+def check_info_panels():
+    # If the player is in an info panel room
+    if curr_module in info_panels:
+        # Decair a varibale to force the loop to start
+        option = 0
+        # While the user does not type an option below continue to loop
+        while option not in ("yes", 'y', 'no', 'n'):
+            # Clear the console
+            os.system("clear")
+            # Tell the player they are in an info panel room
+            entered_info_panel_room = "You enter a room with a strange beeping sound"
+            for char in entered_info_panel_room:
+                print(char, end='')
+                sys.stdout.flush()
+                sleep(0.05)
+            print()
+            sleep(1)
+            for char in "You found an information panel":
+                print(char, end='')
+                sys.stdout.flush()
+                sleep(0.05)
+            print()
+            sleep(2)
+            # Ask the player if they want to view the panel
+            option = input("Do you want to open the panel? (Y)es or (N)o: ")
+            # Force the input to become lower cased
+            option = option.lower()
+        # If they want to open the panel
+        if option == "yes" or option == "y":
+            # Reduce station power by for using the info panel
+            adjust_station_power('sub', 5)
+            # Get the total lifeforms
+            total_lifeforms = len(workers) + 1
+            # Copy the workers array
+            lifeforms_list = workers.copy()
+            # Add the queen's module to the copied workers array
+            lifeforms_list.append(queen)
+            # Get a random lifeform
+            random_lifeform = choice(lifeforms_list)
+            # Get the locked module
+            locked_module = locked
+            # If there is no locked module
+            if locked_module == 0:
+                # Re-declar the vaiable to be "None"
+                locked_module = "None"
+            # Decalre a varibale to force the loop to start
+            option2 = 0
+            # While the user does not type an option below, continue the loop
+            while option2 not in ("return", 'r'):
+                # Clear the console
+                os.system('clear')
+                # Show the infomation to the player
+                print("-----------------------------------------------------------------")
+                print("Station Power: {0} - 5 (For panel usage)".format(power + 5))
+                print("Total Lifeforms: {0}".format(total_lifeforms))
+                print("Lifeform Detected in module {0}".format(random_lifeform))
+                print("Locked module: {0}".format(locked_module))
+                print("-----------------------------------------------------------------\n\n")
+                print("Return to station - (R)")
+                # Ask the user for input
+                option2 = input("> ")
+                # Force the input to become lower cased
+                option2 = option2.lower()
+        # Re-load the module
+        return reload_module()
+
 # Tell the player if something is nearby
 def intuition():
     # Loop through the connecting modules
@@ -885,11 +1033,17 @@ def intuition():
             sleep(1)
             # Then tell the player
             print("I can feel cold air!")
+        # If one is an info panel
+        if connected_module in info_panels:
+            # Wait 1 second
+            sleep(1)
+            # Tell the player
+            print("I can hear a strange beeping sound!")
 
 # Check if the player is in the same module as a worker alien
 def worker_aliens():
     # Allow global variables to be changed
-    global workers, fuel, alive
+    global workers, fuel, alive, hp
     # If the player is in the same module as a worker alien
     if curr_module in workers:
         # Tell the player
@@ -951,7 +1105,22 @@ def worker_aliens():
                 # Wait 1 second
                 sleep(1)
                 # Tell the player the attack was not successful
-                print("The alien squeals but is not dead. It's angry")
+                print("The alien squeals but is not dead. It's angry and attacks you")
+                # Calculate damage taken on how much fuel was missed
+                damage = fuel_needed - fuel_needed
+                # If the player missed the fuel by over 20
+                if damage > 20:
+                    # Double the damage
+                    damage *= 2
+                # Get a total damage after player stats
+                total_damage = calculate_damage(damage)
+                # Reduce player health
+                hp -= total_damage
+                # If the player is dead
+                if hp <= 0:
+                    # Set the variable to False
+                    alive = False
+
         # Tell the player their attack was sucessful and remove the alien from the current module and stop the function
         if action == "s":
             sleep(1)
@@ -960,6 +1129,24 @@ def worker_aliens():
             sleep(1)
             print("The alien has been destroyed.")
             workers.remove(curr_module)
+        return reload_module()
+    
+def check_medbays():
+    global hp
+    room = get_modules_from(curr_module)[2]
+    room = room.lower()
+    if room.endswith('medbay'):
+        os.system('clear')
+        print('You are in a medbay')
+        sleep(1)
+        print('You wonder around the room and find a drawer')
+        sleep(2)
+        print('You open it with curiosity...')
+        sleep(3)
+        random_health = randint(1, 5) * 10
+        print('...and find a medkit which healed you by {0} health'.format(random_health))
+        hp += random_health
+        sleep(5)
         return reload_module()
 
 # Title Screen
@@ -974,9 +1161,11 @@ spawn_npcs()
 while alive and not won:
     # Call the correct functions
     load_module()
+    check_medbays()
     check_vent_shafts()
     move_queen()
     worker_aliens()
+    check_info_panels()
     # If the player is still alive and hasn't won
     if won == False and alive == True and power > 0:
         # Continue playing
@@ -999,4 +1188,4 @@ if alive == False:
     sleep(1)
     print("The station has ran out of power. Unable to sustain life support, you die.")
     sleep(2)
-    print("Game over. You loose!")
+    print("Game over. You lost!")
